@@ -1,0 +1,133 @@
+<html>
+  <title>Advaith's Priority Matrix</title>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+       google.charts.load('current', {'packages':['corechart', 'controls','table']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(initialize);
+
+      function initialize() {
+        var query = new google.visualization.Query(
+            'https://docs.google.com/spreadsheets/d/1BKbfxypw9ZlRBFeBevG0K6su5ruOpCHoA9J0Uodvlmo/gviz/tq?gid=1248477434&headers=1&range=A1:G1000');
+        query.send(draw);
+      }
+
+      function draw(response) {
+        if (response.isError()) {
+          alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+          return;
+        }
+
+        var filter_type = new google.visualization.ControlWrapper({
+          controlType: 'CategoryFilter',
+          containerId: 'filter_type_div',
+          options: {
+            filterColumnLabel: 'Owner'
+          }
+        });
+
+        var filter_status = new google.visualization.ControlWrapper({
+          controlType: 'CategoryFilter',
+          containerId: 'filter_status_div',
+          state:{
+            selectedValues: ['Ongoing','Not Started']
+          },
+          options: {
+            filterColumnLabel: 'Status'
+          }
+        });
+  
+        var data = response.getDataTable();
+        var chart = new google.visualization.ChartWrapper({   
+          chartType: 'BubbleChart',
+          containerId: 'chart_div',
+          options: {
+            title: 'Priority Matrix',
+            width: 1000,
+            height: 750,
+            hAxis: {
+              title: 'Urgency',
+              format: 'long',
+              viewWindowMode:'explicit',
+              viewWindow:{
+                    max:12,
+                    min:0
+                  },
+              ticks: [5,10]
+            },
+            vAxis: {
+              title: 'Importance',
+              viewWindowMode:'explicit',
+              viewWindow:{
+                    max:12,
+                    min:0
+                  },
+              ticks: [5,10]
+            },
+            sizeAxis: {
+              minValue:0,
+              maxValue:10
+            },
+            bubble: {
+              textStyle: {
+                fontSize: 9,
+                auraColor: 'none'
+              }
+            }
+            }
+          });
+
+        var table = new google.visualization.ChartWrapper({   
+          chartType: 'Table',
+          containerId: 'table_div',
+          options: {
+            sortColumn: 6,
+            sortAscending: false,
+            sort: 'enable',
+            page: 'enable',
+            pagesize: 5
+          }
+        });
+        var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
+        dashboard.bind(filter_status,[chart,table]);
+        dashboard.bind(filter_type,[chart,table]);
+        dashboard.draw(data);    
+      }
+    </script>
+    <style>
+      #filter_type_div {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+      }
+      #filter_status_div {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+      }
+      #table_div {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <table align="center">
+      <tr>
+        <td colSpan=2>
+          <div id="dashboard">
+            <div id="chart_div"></div>
+            <div id="filter_type_div"></div>
+            <div id="filter_status_div"></div>
+            <div id="table_div"></div>
+          </div>
+        </td>
+      </tr>
+    </table>
+      
+  </body>
+</html>
